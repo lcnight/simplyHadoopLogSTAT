@@ -90,5 +90,5 @@ while True:
     #print k + str(v)
 
 for i in KeysArray:
-    print MetaInfo[i] + '\t',
+    print str(MetaInfo[i]) + '\t',
 print
