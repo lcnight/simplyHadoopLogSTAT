@@ -36,6 +36,9 @@ public class JobInfoLog
         // map shuffle reduce
         int[] totalTime  = {0, 0, 0};
         int[] totalTasks = {0, 0, 0};
+        totalTasks[0] = Integer.parseInt(jobInfo.get(Keys.TOTAL_MAPS));
+        totalTasks[1] = Integer.parseInt(jobInfo.get(Keys.TOTAL_REDUCES));
+        totalTasks[2] = totalTasks[1];
         //for (JobHistroy.Task task : jobInfo.getAllTasks().values()) {
         for (org.apache.hadoop.mapred.JobHistory.Task task : jobInfo.getAllTasks().values()) {
             String tasktype = task.get(Keys.TASK_TYPE);
@@ -49,7 +52,8 @@ public class JobInfoLog
             Map<String, TaskAttempt> attempts = task.getTaskAttempts();
             for (JobHistory.TaskAttempt attempt : attempts.values()) {
                 String attName = attempt.get(Keys.TASK_ATTEMPT_ID);
-                if (attempt.get(Keys.TASK_STATUS).equals(Values.SUCCESS.name())) {
+                String attStatus = attempt.get(Keys.TASK_STATUS);
+                if (attStatus.equals(Values.SUCCESS.name())) {
                     long processTime = (attempt.getLong(Keys.FINISH_TIME) - 
                             attempt.getLong(Keys.START_TIME)) / 1000;
                     if (Values.MAP.name().equals(tasktype)) {
@@ -59,7 +63,7 @@ public class JobInfoLog
                         println(String.format("map processing time: %d sec", processTime));
                         // map metrics
                         totalTime[0] += processTime;
-                        totalTasks[0] += 1;
+                        //totalTasks[0] += 1;
                     } else if (Values.REDUCE.name().equals(tasktype)) {
                         //reduceTasks[reduceIndex++] = attempt;
                         long shuffleTime = (attempt.getLong(Keys.SHUFFLE_FINISHED) -
@@ -74,17 +78,17 @@ public class JobInfoLog
                                 String.format("reduce : %d sec", reduceTime));
                         // shuffle metrics
                         totalTime[1] += shuffleTime;
-                        totalTasks[1] += 1;
+                        //totalTasks[1] += 1;
                         // reduce metrics
                         totalTime[2] += reduceTime;
-                        totalTasks[2] += 1;
+                        //totalTasks[2] += 1;
                     } else {
                         println(String.format("<< %s >> taskAttempt: %s ", tasktype, attName));
                     }
                     printKeyValue(attempt, Keys.TASK_STATUS, Keys.START_TIME, Keys.FINISH_TIME);
                 } else {
-                    println("***FAIL*** task ID: " + attempt.get(Keys.TASKID) +
-                            " attempt ID: " + attName);
+                    System.out.printf("***%s*** task ID: %s attempt ID: %s\n", 
+                            attStatus, attempt.get(Keys.TASKID), attName);
                 }
                 println();
             }
