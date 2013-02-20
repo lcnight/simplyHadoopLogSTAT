@@ -20,12 +20,15 @@ STR_SEP='"'
 KJID="JOBID=";  KJNAME="JOBNAME=";  KUSER='USER=';  KSUBTIME='SUBMIT_TIME='; KJQ='JOB_QUEUE=';
 KJP='JOB_PRIORITY=';   KLANTIME='LAUNCH_TIME=';  KTMAPS='TOTAL_MAPS=';    KTREDUCES='TOTAL_REDUCES=';
 KJSTAT='JOB_STATUS='; KFINTIME='FINISH_TIME='; KFINMAPS='FINISHED_MAPS='; KFINREDUCES='FINISHED_REDUCES=';
-KFAILMAPS='FAILED_MAPS=';   KFAILREDUCES='FAILED_REDUCES='
+KFAILMAPS='FAILED_MAPS=';   KFAILREDUCES='FAILED_REDUCES=';
+# compute collumns
+COM_PENDING='pending'; COM_PROCESSING='processing';
+
 MetaInfo = {KJID:None, KJNAME:None, KUSER:None, KSUBTIME:None, KJQ:None,
         KJP:None, KLANTIME:None, KTMAPS:None, KTREDUCES:None, KJSTAT:None,
         KFINTIME:None, KFINMAPS:None, KFINREDUCES:None, KFAILMAPS:None, KFAILREDUCES:None}
 KeysArray=[KJID, KJNAME, KUSER, KJQ, KJP, KJSTAT, KSUBTIME, KLANTIME, KFINTIME, KTMAPS, KTREDUCES,
-        KFINMAPS, KFINREDUCES, KFAILMAPS, KFAILREDUCES]
+        KFINMAPS, KFINREDUCES, KFAILMAPS, KFAILREDUCES, COM_PENDING, COM_PROCESSING]
 ########################### main process ###########################
 if len(sys.argv) < 2: Usage()
 # build info title
@@ -82,12 +85,16 @@ while True:
             if sss == None: continue
             else: MetaInfo[k] = sss
 
-
-    #elif line.startswith(TASK_START): # process TASK {attempts} INFO
-    #else
-
 #for k, v in MetaInfo.items():
     #print k + str(v)
+
+## process compute collumns
+job_subTime = long(MetaInfo[KSUBTIME]);
+job_lanchTime = long(MetaInfo[KLANTIME]);
+job_finTime = long(MetaInfo[KFINTIME]);
+
+MetaInfo[COM_PENDING] = (job_lanchTime - job_subTime) / 1000.0;
+MetaInfo[COM_PROCESSING] = (job_finTime - job_lanchTime) / 1000.0;
 
 for i in KeysArray:
     print str(MetaInfo[i]) + '\t',
